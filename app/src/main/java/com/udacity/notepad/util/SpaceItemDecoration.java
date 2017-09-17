@@ -8,18 +8,21 @@ import android.view.View;
 
 public class SpaceItemDecoration extends RecyclerView.ItemDecoration {
 
-    private final Context context;
-    private final int dimenRes;
     private final int space;
 
-    public SpaceItemDecoration(Context context, int dimenRes) {
-        this.context = context;
-        this.dimenRes = dimenRes;
-        this.space = context.getResources().getDimensionPixelOffset(dimenRes);
-    }
+    // This class is to verbose and performs unnecessary operations
+    // The 'instanceof' is a clear indicator of something wrong
+    // The return -1 in getOrientation is not handled and therefore ignored on the switch
+    // (Note that non of the cases matches the value -1)
+    // Instead the following constructor can be used:
 
-    private SpaceItemDecoration() {
-        throw new RuntimeException();
+    // public SpaceItemDecoration(Context context, int dimenRes, int orientation)
+
+    // adding the orientation in the constructor, which is known by the caller
+    // no need to calculate that at all (Notice that it is being calculated in every element draw!!)
+    // the switch would be cleaner and the code much simpler
+    public SpaceItemDecoration(Context context, int dimenRes) {
+        space = context.getResources().getDimensionPixelOffset(dimenRes);
     }
 
     @Override
@@ -36,9 +39,9 @@ public class SpaceItemDecoration extends RecyclerView.ItemDecoration {
     }
 
     private int getOrientation(RecyclerView parent) {
-        RecyclerView.LayoutManager lm = parent.getLayoutManager();
-        if (lm instanceof LinearLayoutManager) {
-            return ((LinearLayoutManager) lm).getOrientation();
+        RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
+        if (layoutManager instanceof LinearLayoutManager) {
+            return ((LinearLayoutManager) layoutManager).getOrientation();
         }
         return -1;
     }

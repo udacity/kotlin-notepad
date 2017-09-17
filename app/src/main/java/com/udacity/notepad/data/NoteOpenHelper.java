@@ -4,23 +4,20 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import static com.udacity.notepad.data.NotesContract.SQL_CREATE_ENTRIES;
-import static com.udacity.notepad.data.NotesContract.SQL_DELETE_ENTRIES;
+public class NoteOpenHelper extends SQLiteOpenHelper {
 
-public class NotesOpenHelper extends SQLiteOpenHelper {
-
-    public NotesOpenHelper(Context context) {
+    public NoteOpenHelper(Context context) {
         super(context, "notes.db", null, 1);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_ENTRIES);
+        db.execSQL(NoteContract.SQL_CREATE_NOTES_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(SQL_DELETE_ENTRIES);
+        db.execSQL(NoteContract.SQL_DELETE_NOTES_TABLE);
         onCreate(db);
     }
 }

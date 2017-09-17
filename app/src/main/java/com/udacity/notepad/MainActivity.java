@@ -11,12 +11,12 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.udacity.notepad.crud.CreateActivity;
-import com.udacity.notepad.recycler.NotesAdapter;
+import com.udacity.notepad.recycler.NoteAdapter;
 import com.udacity.notepad.util.SpaceItemDecoration;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView recycler;
+    private RecyclerView recyclerView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -34,22 +34,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        recycler = findViewById(R.id.recycler);
-        recycler.setLayoutManager(new LinearLayoutManager(this));
-        recycler.addItemDecoration(new SpaceItemDecoration(this, R.dimen.margin_small));
-        recycler.setAdapter(new NotesAdapter(this));
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.addItemDecoration(new SpaceItemDecoration(this, R.dimen.margin_small));
+        recyclerView.setAdapter(new NoteAdapter());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        refresh();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        recycler.setAdapter(null);
+        // I would make the call here instead of having a method for that
+        // It is one line of code and it is not reused
+        refreshAdapter();
     }
 
     @Override
@@ -72,8 +68,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    private void refresh() {
-        ((NotesAdapter) recycler.getAdapter()).refresh();
+    private void refreshAdapter() {
+        // I would have the NoteAdapter as a field rather than retrieving and casting it every time
+        ((NoteAdapter) recyclerView.getAdapter()).refresh();
     }
 }

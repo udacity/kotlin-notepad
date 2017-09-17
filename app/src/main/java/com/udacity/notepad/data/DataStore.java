@@ -11,14 +11,14 @@ public final class DataStore {
 
     public static final Executor EXEC = Executors.newSingleThreadExecutor();
 
-    private static NoteDatabase notes;
+    private static NoteDao noteDao;
 
     public static void init(Context context) {
-        notes = new NoteDatabase(context);
+        noteDao = new NoteDao(context);
     }
 
-    public static NoteDatabase getNotes() {
-        return notes;
+    public static NoteDao getNoteDao() {
+        return noteDao;
     }
 
     public static void execute(Runnable runnable) {

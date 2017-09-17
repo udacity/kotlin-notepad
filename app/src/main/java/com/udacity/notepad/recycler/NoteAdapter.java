@@ -1,6 +1,5 @@
 package com.udacity.notepad.recycler;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.widget.RecyclerView;
@@ -16,14 +15,14 @@ import com.udacity.notepad.data.Note;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
+public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NotesViewHolder> {
 
-    private final Context context;
     private List<Note> notes = new ArrayList<>();
     private boolean isRefreshing = false;
 
-    public NotesAdapter(Context context) {
-        this.context = context;
+    // The context is not necessary
+    // see onCreateViewHolder
+    public NoteAdapter() {
         setHasStableIds(true);
     }
 
@@ -44,7 +43,9 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
     @Override
     public NotesViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_note, parent, false);
+        // Here is why the context is not necessary to be pass to the constructor,
+        // it can be retrieved from the parent
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_note, parent, false);
         return new NotesViewHolder(view);
     }
 
@@ -55,16 +56,19 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     }
 
     public void refresh() {
-        if (isRefreshing) return;
+        if (isRefreshing) {
+            return;
+        }
+
         isRefreshing = true;
         DataStore.execute(new Runnable() {
             @Override
             public void run() {
-                final List<Note> notes = DataStore.getNotes().getAll();
+                final List<Note> notes = DataStore.getNoteDao().getAll();
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        NotesAdapter.this.notes = notes;
+                        NoteAdapter.this.notes = notes;
                         notifyDataSetChanged();
                         isRefreshing = false;
                     }

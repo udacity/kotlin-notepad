@@ -5,39 +5,39 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.udacity.notepad.data.NoteContract.NoteEntry;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import static android.provider.BaseColumns._ID;
-import static com.udacity.notepad.data.NotesContract.NoteTable.CREATED_AT;
-import static com.udacity.notepad.data.NotesContract.NoteTable.IS_PINNED;
-import static com.udacity.notepad.data.NotesContract.NoteTable.TEXT;
-import static com.udacity.notepad.data.NotesContract.NoteTable.UPDATED_AT;
-import static com.udacity.notepad.data.NotesContract.NoteTable._TABLE_NAME;
 
-public class NoteDatabase {
+// Is this a good name for this class? Any better idea?
+public class NoteDao {
 
-    private final NotesOpenHelper helper;
+    private final NoteOpenHelper helper;
 
-    public NoteDatabase(Context context) {
-        helper = new NotesOpenHelper(context);
+    // For consistency all should be singular (Note instead of Notes)
+    public NoteDao(Context context) {
+        helper = new NoteOpenHelper(context);
     }
 
     public List<Note> getAll() {
-        Cursor cursor = helper.getReadableDatabase().query(_TABLE_NAME,
+        // With the imports this way this becomes much more readable
+        Cursor cursor = helper.getReadableDatabase().query(NoteEntry.TABLE_NAME,
                 null,
                 null,
                 null,
                 null,
                 null,
-                CREATED_AT);
-        List<Note> retval = new ArrayList<>();
+                NoteEntry.CREATED_AT);
+        List<Note> notes = new ArrayList<>();
         while (cursor.moveToNext()) {
-            retval.add(fromCursor(cursor));
+            notes.add(fromCursor(cursor));
         }
         cursor.close();
-        return retval;
+        return notes;
     }
 
     public List<Note> loadAllByIds(int... ids) {
@@ -53,17 +53,27 @@ public class NoteDatabase {
         for (i = 0; i < ids.length; ++i) {
             args[i] = Integer.toString(ids[i]);
         }
+
+        // Here it is adding "?" to the selection that would be then replace by the args
+        // In this case it does not seem a good approach because:
+        // - You do 2 loops and the query method would need to put everything in place
+        // - SQL cannot handle an infinite number of "?" without an AND
+        //   so the query will crash if it is big enough
+        // I would suggest to add the ids directly into the selection and do not use args
+        // in this case. This will solve the problem above looping once only
+        // Still, this method is unused so probably not necessary
+
         String selection = _ID + " IN (" + questionMarks.toString() + ")";
-        Cursor cursor = helper.getReadableDatabase().query(_TABLE_NAME,
+        Cursor cursor = helper.getReadableDatabase().query(NoteEntry.TABLE_NAME,
                 null,
                 selection,
                 args,
                 null,
                 null,
-                CREATED_AT);
-        List<Note> retval = allFromCursor(cursor);
+                NoteEntry.CREATED_AT);
+        List<Note> notes = allFromCursor(cursor);
         cursor.close();
-        return retval;
+        return notes;
     }
 
     public void insert(Note... notes) {
@@ -72,7 +82,7 @@ public class NoteDatabase {
         db.beginTransaction();
         try {
             for (ContentValues value : values) {
-                db.insert(_TABLE_NAME, null, value);
+                db.insert(NoteEntry.TABLE_NAME, null, value);
             }
             db.setTransactionSuccessful();
         } finally {
@@ -82,21 +92,29 @@ public class NoteDatabase {
 
     public void update(Note note) {
         ContentValues values = fromNote(note);
-        helper.getWritableDatabase().update(_TABLE_NAME,
+        helper.getWritableDatabase().update(NoteEntry.TABLE_NAME,
                 values,
                 _ID + " = ?",
+                // This is super ugly code. it should be extracted to a local variable
+                // or even a method as it could be reused
                 new String[]{ Integer.toString(note.getId()) });
     }
 
     public void delete(Note note) {
-        helper.getWritableDatabase().delete(_TABLE_NAME,
+        helper.getWritableDatabase().delete(NoteEntry.TABLE_NAME,
                 _ID + " = ?",
                 new String[]{ Integer.toString(note.getId()) });
     }
 
+    // The names of the methods below do not seem good to me
     private static Note fromCursor(Cursor cursor) {
         int col = 0;
         Note note = new Note();
+        // This is terrible!
+        // using col++ is a source of future problems
+        // We have a contract for a reason
+        // example:
+        // note.setId(cursor.getInt(cursor.getColumnIndex(NoteEntry._ID)));
         note.setId(cursor.getInt(col++));
         note.setText(cursor.getString(col++));
         note.setPinned(cursor.getInt(col++) != 0);
@@ -106,11 +124,11 @@ public class NoteDatabase {
     }
 
     private static List<Note> allFromCursor(Cursor cursor) {
-        List<Note> retval = new ArrayList<>();
+        List<Note> notes = new ArrayList<>();
         while (cursor.moveToNext()) {
-            retval.add(fromCursor(cursor));
+            notes.add(fromCursor(cursor));
         }
-        return retval;
+        return notes;
     }
 
     private static ContentValues fromNote(Note note) {
@@ -119,10 +137,10 @@ public class NoteDatabase {
         if (id != -1) {
             values.put(_ID, id);
         }
-        values.put(TEXT, note.getText());
-        values.put(IS_PINNED, note.isPinned());
-        values.put(CREATED_AT, note.getCreatedAt().getTime());
-        values.put(UPDATED_AT, note.getUpdatedAt().getTime());
+        values.put(NoteEntry.TEXT, note.getText());
+        values.put(NoteEntry.IS_PINNED, note.isPinned());
+        values.put(NoteEntry.CREATED_AT, note.getCreatedAt().getTime());
+        values.put(NoteEntry.UPDATED_AT, note.getUpdatedAt().getTime());
         return values;
     }
 

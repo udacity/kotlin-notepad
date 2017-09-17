@@ -17,6 +17,8 @@ import java.util.Date;
 
 public class CreateActivity extends AppCompatActivity {
 
+    // I have used a similar pattern but in this case I do not see the benefit
+    // Also the name of the method is not representative
     public static Intent get(Context context) {
         return new Intent(context, CreateActivity.class);
     }
@@ -40,7 +42,7 @@ public class CreateActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_accept:
-                save();
+                saveNote();
                 finish();
                 break;
             default:
@@ -49,17 +51,18 @@ public class CreateActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void save() {
+    // Methods names vague and are not descriptive
+    private void saveNote() {
         DataStore.execute(new Runnable() {
             @Override
             public void run() {
-                Note note = updateNote();
-                DataStore.getNotes().insert(note);
+                Note note = createNote();
+                DataStore.getNoteDao().insert(note);
             }
         });
     }
 
-    private Note updateNote() {
+    private Note createNote() {
         Note note = new Note();
         note.setText(editText.getText().toString());
         note.setUpdatedAt(new Date());
