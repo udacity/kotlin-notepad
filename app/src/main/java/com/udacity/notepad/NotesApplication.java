@@ -9,6 +9,6 @@ public class NotesApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        DataStore.init(this);
+        DataStore.INSTANCE.init(this);
     }
 }

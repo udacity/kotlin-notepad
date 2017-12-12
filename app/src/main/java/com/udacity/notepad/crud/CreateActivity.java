@@ -17,11 +17,11 @@ import java.util.Date;
 
 public class CreateActivity extends AppCompatActivity {
 
+    private TextView editText;
+
     public static Intent get(Context context) {
         return new Intent(context, CreateActivity.class);
     }
-
-    private TextView editText;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,7 +50,7 @@ public class CreateActivity extends AppCompatActivity {
     }
 
     private void save() {
-        DataStore.execute(new Runnable() {
+        DataStore.INSTANCE.execute(new Runnable() {
             @Override
             public void run() {
                 Note note = updateNote();
