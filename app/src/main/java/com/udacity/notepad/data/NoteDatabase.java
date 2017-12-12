@@ -10,11 +10,6 @@ import java.util.Date;
 import java.util.List;
 
 import static android.provider.BaseColumns._ID;
-import static com.udacity.notepad.data.NotesContract.NoteTable.CREATED_AT;
-import static com.udacity.notepad.data.NotesContract.NoteTable.IS_PINNED;
-import static com.udacity.notepad.data.NotesContract.NoteTable.TEXT;
-import static com.udacity.notepad.data.NotesContract.NoteTable.UPDATED_AT;
-import static com.udacity.notepad.data.NotesContract.NoteTable._TABLE_NAME;
 
 public class NoteDatabase {
 
@@ -22,73 +17,6 @@ public class NoteDatabase {
 
     public NoteDatabase(Context context) {
         helper = new NotesOpenHelper(context);
-    }
-
-    public List<Note> getAll() {
-        Cursor cursor = helper.getReadableDatabase().query(_TABLE_NAME,
-                null,
-                null,
-                null,
-                null,
-                null,
-                CREATED_AT);
-        List<Note> retval = allFromCursor(cursor);
-        cursor.close();
-        return retval;
-    }
-
-    public List<Note> loadAllByIds(int... ids) {
-        StringBuilder questionMarks = new StringBuilder();
-        int i = 0;
-        while (i++ < ids.length) {
-            questionMarks.append("?");
-            if (i <= ids.length - 1) {
-                questionMarks.append(", ");
-            }
-        }
-        String[] args = new String[ids.length];
-        for (i = 0; i < ids.length; ++i) {
-            args[i] = Integer.toString(ids[i]);
-        }
-        String selection = _ID + " IN (" + questionMarks.toString() + ")";
-        Cursor cursor = helper.getReadableDatabase().query(_TABLE_NAME,
-                null,
-                selection,
-                args,
-                null,
-                null,
-                CREATED_AT);
-        List<Note> retval = allFromCursor(cursor);
-        cursor.close();
-        return retval;
-    }
-
-    public void insert(Note... notes) {
-        List<ContentValues> values = fromNotes(notes);
-        SQLiteDatabase db = helper.getWritableDatabase();
-        db.beginTransaction();
-        try {
-            for (ContentValues value : values) {
-                db.insert(_TABLE_NAME, null, value);
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
-    }
-
-    public void update(Note note) {
-        ContentValues values = fromNote(note);
-        helper.getWritableDatabase().update(_TABLE_NAME,
-                values,
-                _ID + " = ?",
-                new String[]{ Integer.toString(note.getId()) });
-    }
-
-    public void delete(Note note) {
-        helper.getWritableDatabase().delete(_TABLE_NAME,
-                _ID + " = ?",
-                new String[]{ Integer.toString(note.getId()) });
     }
 
     private static Note fromCursor(Cursor cursor) {
@@ -116,10 +44,10 @@ public class NoteDatabase {
         if (id != -1) {
             values.put(_ID, id);
         }
-        values.put(TEXT, note.getText());
-        values.put(IS_PINNED, note.isPinned());
-        values.put(CREATED_AT, note.getCreatedAt().getTime());
-        values.put(UPDATED_AT, note.getUpdatedAt().getTime());
+        values.put(Companion.getTEXT(), note.getText());
+        values.put(Companion.getIS_PINNED(), note.isPinned());
+        values.put(Companion.getCREATED_AT(), note.getCreatedAt().getTime());
+        values.put(Companion.getUPDATED_AT(), note.getUpdatedAt().getTime());
         return values;
     }
 
@@ -129,5 +57,72 @@ public class NoteDatabase {
             values.add(fromNote(note));
         }
         return values;
+    }
+
+    public List<Note> getAll() {
+        Cursor cursor = helper.getReadableDatabase().query(Companion.get_TABLE_NAME(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                Companion.getCREATED_AT());
+        List<Note> retval = allFromCursor(cursor);
+        cursor.close();
+        return retval;
+    }
+
+    public List<Note> loadAllByIds(int... ids) {
+        StringBuilder questionMarks = new StringBuilder();
+        int i = 0;
+        while (i++ < ids.length) {
+            questionMarks.append("?");
+            if (i <= ids.length - 1) {
+                questionMarks.append(", ");
+            }
+        }
+        String[] args = new String[ids.length];
+        for (i = 0; i < ids.length; ++i) {
+            args[i] = Integer.toString(ids[i]);
+        }
+        String selection = _ID + " IN (" + questionMarks + ")";
+        Cursor cursor = helper.getReadableDatabase().query(Companion.get_TABLE_NAME(),
+                null,
+                selection,
+                args,
+                null,
+                null,
+                Companion.getCREATED_AT());
+        List<Note> retval = allFromCursor(cursor);
+        cursor.close();
+        return retval;
+    }
+
+    public void insert(Note... notes) {
+        List<ContentValues> values = fromNotes(notes);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            for (ContentValues value : values) {
+                db.insert(Companion.get_TABLE_NAME(), null, value);
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public void update(Note note) {
+        ContentValues values = fromNote(note);
+        helper.getWritableDatabase().update(Companion.get_TABLE_NAME(),
+                values,
+                _ID + " = ?",
+                new String[]{ Integer.toString(note.getId()) });
+    }
+
+    public void delete(Note note) {
+        helper.getWritableDatabase().delete(Companion.get_TABLE_NAME(),
+                _ID + " = ?",
+                new String[]{ Integer.toString(note.getId()) });
     }
 }
