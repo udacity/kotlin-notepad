@@ -14,6 +14,7 @@ import com.udacity.notepad.crud.CreateActivity;
 import com.udacity.notepad.recycler.NotesAdapter;
 import com.udacity.notepad.util.SpaceItemDecoration;
 
+// This is just a test comment
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recycler;
