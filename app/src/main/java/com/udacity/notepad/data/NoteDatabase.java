@@ -82,23 +82,23 @@ public class NoteDatabase {
         helper.getWritableDatabase().update(_TABLE_NAME,
                 values,
                 _ID + " = ?",
-                new String[]{ Integer.toString(note.getId()) });
+                new String[]{ Integer.toString(note.id) });
     }
 
     public void delete(Note note) {
         helper.getWritableDatabase().delete(_TABLE_NAME,
                 _ID + " = ?",
-                new String[]{ Integer.toString(note.getId()) });
+                new String[]{ Integer.toString(note.id) });
     }
 
     private static Note fromCursor(Cursor cursor) {
         int col = 0;
         Note note = new Note();
-        note.setId(cursor.getInt(col++));
-        note.setText(cursor.getString(col++));
+        note.id = cursor.getInt(col++);
+        note.text = cursor.getString(col++);
         note.setPinned(cursor.getInt(col++) != 0);
-        note.setCreatedAt(new Date(cursor.getLong(col++)));
-        note.setUpdatedAt(new Date(cursor.getLong(col)));
+        note.createdAt = new Date(cursor.getLong(col++));
+        note.updatedAt = new Date(cursor.getLong(col));
         return note;
     }
 
@@ -112,14 +112,14 @@ public class NoteDatabase {
 
     private static ContentValues fromNote(Note note) {
         ContentValues values = new ContentValues();
-        int id = note.getId();
+        int id = note.id;
         if (id != -1) {
             values.put(_ID, id);
         }
-        values.put(TEXT, note.getText());
+        values.put(TEXT, note.text);
         values.put(IS_PINNED, note.isPinned());
-        values.put(CREATED_AT, note.getCreatedAt().getTime());
-        values.put(UPDATED_AT, note.getUpdatedAt().getTime());
+        values.put(CREATED_AT, note.createdAt.getTime());
+        values.put(UPDATED_AT, note.updatedAt.getTime());
         return values;
     }
 

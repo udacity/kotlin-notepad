@@ -62,8 +62,8 @@ public class CreateActivity extends AppCompatActivity {
 
     private Note updateNote() {
         Note note = new Note();
-        note.setText(editText.getText().toString());
-        note.setUpdatedAt(new Date());
+        note.text = editText.getText().toString();
+        note.updatedAt = new Date();
         return note;
     }
 }
