@@ -1,12 +1,15 @@
 package com.udacity.notepad.data;
 
-import android.support.annotation.Nullable;
+
+
+import androidx.annotation.Nullable;
 
 import java.util.Date;
 
 public class Note {
     private int id = -1;
-    @Nullable private String text;
+    @Nullable
+    private String text;
     private boolean isPinned = false;
     private Date createdAt = new Date();
     private Date updatedAt;
